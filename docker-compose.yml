@@ -1,0 +1,14 @@
+
+version: '3'
+services:
+    node-base:
+        build:
+          context: ./base
+          dockerfile: Dockerfile
+        ports:
+            - '80:80'
+        networks:
+            - lesson_vpn
+
+networks:
+    lesson_vpn:
