@@ -7,8 +7,21 @@ services:
           dockerfile: Dockerfile
         ports:
             - '80:80'
+        volumes:
+            - "./base/src:/usr/src/app/src/:cached"
         networks:
-            - lesson_vpn
-
+            lesson_vpn:
+                aliases:
+                    - base
+    node-a:
+        build:
+          context: ./a
+          dockerfile: Dockerfile
+        volumes:
+            - "./a/src:/usr/src/app/src/:cached"
+        networks:
+            lesson_vpn:
+                aliases:
+                    - a
 networks:
     lesson_vpn:
