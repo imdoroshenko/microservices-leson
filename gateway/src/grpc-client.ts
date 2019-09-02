@@ -2,9 +2,8 @@ import * as grpc from 'grpc'
 import * as protoLoader from '@grpc/proto-loader'
 
 export function getClient(address: string): any {
-    console.log('address', address)
     const packageDefinition = protoLoader.loadSync(
-        './protos/message.proto', {
+        './protos/comments.proto', {
             keepCase: true,
             longs: String,
             enums: String,
@@ -12,6 +11,6 @@ export function getClient(address: string): any {
             oneofs: true,
         });
     const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any
-    return new protoDescriptor.helloworld.Greeter(address, grpc.credentials.createInsecure());
+    return new protoDescriptor.comments.Manager(address, grpc.credentials.createInsecure());
 }
 

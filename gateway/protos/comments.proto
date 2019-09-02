@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package comments;
+
+service Manager {
+  rpc Create (CreateComment) returns (CommentUUID) {}
+  rpc Read (PostUUID) returns (CommentList) {}
+  rpc Count (PostUUID) returns (CommentList) {}
+  rpc Update (Comment) returns (CommentUUID) {}
+  rpc Delete (CommentUUID) returns (CommentUUID) {}
+  rpc DeleteFromPost (PostUUID) returns (CommentUUID) {}
+}
+
+message CreateComment {
+  string post_uuid = 1;
+  string email = 2;
+  string content = 3;
+}
+
+message Comment {
+  string uuid = 1;
+  string post_uuid = 2;
+  string email = 3;
+  string content = 4;
+}
+
+message CommentList {
+  repeated Comment comments = 1;
+}
+
+message Count {
+  int32 count = 1;
+}
+
+message PostUUID {
+  string post_uuid = 1;
+}
+
+message CommentUUID {
+  string uuid = 1;
+}
+

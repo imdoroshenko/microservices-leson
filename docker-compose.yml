@@ -8,7 +8,7 @@ services:
         ports:
             - '80:80'
         environment:
-            COMMENTS_SERVICE: comments:50051
+            COMMENTS_SERVICE: comments-service:50051
         volumes:
             - "./gateway/src:/usr/src/app/src/:cached"
         networks:
@@ -20,12 +20,22 @@ services:
           context: ./comments
           dockerfile: Dockerfile
         environment:
-            BIND_LOCATION: comments:50051
+            MONGO_URL: mongodb://comments-db:27017
+            BIND_LOCATION: comments-service:50051
         volumes:
             - "./comments/src:/usr/src/app/src/:cached"
         networks:
+            comments_vpn:
             lesson_vpn:
                 aliases:
-                    - comments
+                    - comments-service
+    comments-db:
+        image: mongo:4.2.0
+        networks:
+            comments_vpn:
+                aliases:
+                    - comments-db
+
 networks:
     lesson_vpn:
+    comments_vpn:

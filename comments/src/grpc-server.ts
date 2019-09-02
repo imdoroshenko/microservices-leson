@@ -1,7 +1,9 @@
 import * as grpc from 'grpc'
 import * as protoLoader from '@grpc/proto-loader'
+import { getDB } from './mongo-client'
 
-function sayHello(call: grpc.ServerUnaryCall<any>, callback: grpc.sendUnaryData<any>) {
+async function sayHello(call: grpc.ServerUnaryCall<any>, callback: grpc.sendUnaryData<any>) {
+    const db = await getDB()
     callback(null, {message: 'Hello ' + call.request.name});
 }
 
@@ -11,7 +13,7 @@ function sayHelloAgain(call: grpc.ServerUnaryCall<any>, callback: grpc.sendUnary
 
 export function grpcServer(location: string = '127.0.0.1:50051') {
     const packageDefinition = protoLoader.loadSync(
-        './protos/message.proto', {
+        './protos/comments.proto', {
             keepCase: true,
             longs: String,
             enums: String,
@@ -20,8 +22,22 @@ export function grpcServer(location: string = '127.0.0.1:50051') {
         });
     const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any
     const server = new grpc.Server()
-    server.addService(protoDescriptor.helloworld.Greeter.service,
-        {sayHello: sayHello, sayHelloAgain: sayHelloAgain})
+    server.addService(protoDescriptor.comments.Manager.service,
+        {
+            create: (call, callback) => callback(null, {}),
+            read: (call, callback) => callback(null, {comments: [
+                {
+                    uuid: '123',
+                    post_uuid: '321',
+                    email: 'test@email.com',
+                    content: 'Hello World!',
+                }
+            ]}),
+            count: (call, callback) => callback(null, {}),
+            update: (call, callback) => callback(null, {}),
+            delete: (call, callback) => callback(null, {}),
+            deleteFromPost: (call, callback) => callback(null, {}),
+        })
     server.bind(location, grpc.ServerCredentials.createInsecure())
     console.log('Server running at ' + location)
     server.start()
