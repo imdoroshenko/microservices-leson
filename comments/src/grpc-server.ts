@@ -25,14 +25,16 @@ export function grpcServer(location: string = '127.0.0.1:50051') {
     server.addService(protoDescriptor.comments.Manager.service,
         {
             create: (call, callback) => callback(null, {}),
-            read: (call, callback) => callback(null, {comments: [
+            read: (call, callback) => {
+                console.log('!me!')
+                callback(null, {comments: [
                 {
                     uuid: '123',
                     post_uuid: '321',
                     email: 'test@email.com',
                     content: 'Hello World!',
                 }
-            ]}),
+            ]})},
             count: (call, callback) => callback(null, {}),
             update: (call, callback) => callback(null, {}),
             delete: (call, callback) => callback(null, {}),

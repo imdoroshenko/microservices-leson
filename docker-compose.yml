@@ -1,7 +1,8 @@
 
-version: '3'
+version: '3.7'
 services:
     gateway:
+        image: microservices_gateway
         build:
           context: ./gateway
           dockerfile: Dockerfile
@@ -16,12 +17,17 @@ services:
                 aliases:
                     - gateway
     comments:
+        image: microservices_comments
         build:
           context: ./comments
           dockerfile: Dockerfile
         environment:
             MONGO_URL: mongodb://comments-db:27017
-            BIND_LOCATION: comments-service:50051
+            BIND_LOCATION: 0.0.0.0:50051
+        deploy:
+            mode: replicated
+            replicas: 2
+            endpoint_mode: dnsrr
         volumes:
             - "./comments/src:/usr/src/app/src/:cached"
         networks:
@@ -39,3 +45,4 @@ services:
 networks:
     lesson_vpn:
     comments_vpn:
+        

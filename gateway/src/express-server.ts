@@ -15,6 +15,7 @@ export function expressServer() {
             if (err) {
                 console.error(err)
             }
+            console.log('!me')
             res.send(response)
         })
     })
