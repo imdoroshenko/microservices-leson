@@ -1,27 +1,31 @@
 
 version: '3'
 services:
-    node-base:
+    gateway:
         build:
-          context: ./base
+          context: ./gateway
           dockerfile: Dockerfile
         ports:
             - '80:80'
+        environment:
+            COMMENTS_SERVICE: comments:50051
         volumes:
-            - "./base/src:/usr/src/app/src/:cached"
+            - "./gateway/src:/usr/src/app/src/:cached"
         networks:
             lesson_vpn:
                 aliases:
-                    - base
-    node-a:
+                    - gateway
+    comments:
         build:
-          context: ./a
+          context: ./comments
           dockerfile: Dockerfile
+        environment:
+            BIND_LOCATION: comments:50051
         volumes:
-            - "./a/src:/usr/src/app/src/:cached"
+            - "./comments/src:/usr/src/app/src/:cached"
         networks:
             lesson_vpn:
                 aliases:
-                    - a
+                    - comments
 networks:
     lesson_vpn:
