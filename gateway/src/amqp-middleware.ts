@@ -20,20 +20,3 @@ export async function getAmpqMiddleware(url: string): Promise<RequestHandler> {
     }
 }
 
-export async function createTestConsumer(name: string) {
-    const channel = await (await getConnection('amqp://ampq:5672')).createChannel()
-    const queue = 'fetch'
-    await channel.assertQueue(queue, { durable: false });
-    channel.consume(queue, (msg) => {
-        if (msg) {
-            channel.sendToQueue(
-                msg.properties.replyTo,
-                Buffer.from('Hello from ' + name + '!'),
-                { correlationId: msg.properties.clusterId}
-            )
-            console.log(name + ': ' + msg.content.toString());
-        } 
-    }, {
-        noAck: true
-    })
-}

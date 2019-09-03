@@ -2,7 +2,7 @@ import * as grpc from 'grpc'
 import * as protoLoader from '@grpc/proto-loader'
 import { RequestHandler } from 'express';
 
-function getClient(address: string): any {
+function getClient(address: string): grpc.Client {
     const packageDefinition = protoLoader.loadSync(
         './protos/comments.proto', {
             keepCase: true,
@@ -12,7 +12,8 @@ function getClient(address: string): any {
             oneofs: true,
         });
     const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as any
-    return new protoDescriptor.comments.Manager(address, grpc.credentials.createInsecure())
+    const Manager: typeof grpc.Client = protoDescriptor.comments.Manager
+    return new Manager(address, grpc.credentials.createInsecure())
 }
 
 export async function getGrqpcMiddleware(address: string): Promise<RequestHandler> {

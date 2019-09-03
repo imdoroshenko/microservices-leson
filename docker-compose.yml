@@ -49,12 +49,35 @@ services:
             lesson_vpn:
                 aliases:
                     - fetch
+    posts:
+        image: microservices_posts
+        build:
+          context: ./posts
+          dockerfile: Dockerfile
+        environment:
+            PSQL_URL: postgresql://postgres:@posts-db:5432/posts
+        volumes:
+            - "./posts/src:/usr/src/app/src/:cached"
+        networks:
+            posts_vpn:
+            lesson_vpn:
+                aliases:
+                    - posts
     comments-db:
         image: mongo:4.2.0
         networks:
             comments_vpn:
                 aliases:
                     - comments-db
+    posts-db:
+        image: microservices_posts-db
+        build:
+          context: ./posts-db
+          dockerfile: Dockerfile
+        networks:
+            posts_vpn:
+                aliases:
+                    - posts-db
     ampq:
         image: rabbitmq:3.7.1
         networks:
@@ -64,4 +87,5 @@ services:
 networks:
     lesson_vpn:
     comments_vpn:
+    posts_vpn:
         
