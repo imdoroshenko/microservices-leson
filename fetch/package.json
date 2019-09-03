@@ -1,33 +1,29 @@
 {
-  "name": "gateway",
+  "name": "fetch",
   "version": "1.0.0",
-  "description": "gateway service",
+  "description": "fetch service",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
     "watch": "tsc-watch --onSuccess \"node -r source-map-support/register ./dist/index.js\"",
-    "docker:build": "docker build -t gateway:1.0.0 .",
-    "docker:run": "docker run -d -p 80:80 -v $(pwd)/src:/usr/src/app/src/:cached gateway:1.0.0",
+    "docker:build": "docker build -t fetch:1.0.0 .",
+    "docker:run": "docker run -d -p 80:80 -v $(pwd)/src:/usr/src/app/src/:cached fetch:1.0.0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Ivan Doeoshenko <idoroshenko@lohika.com>",
   "license": "ISC",
   "dependencies": {
-    "@grpc/proto-loader": "^0.5.1",
     "amqplib": "^0.5.5",
-    "express": "^4.17.1",
     "google-protobuf": "^3.9.1",
-    "grpc": "^1.23.3",
-    "node-fetch": "^2.6.0",
-    "uuid": "^3.3.3"
+    "jsdom": "^15.1.1",
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {
     "@types/amqplib": "^0.5.13",
-    "@types/express": "^4.17.1",
+    "@types/jsdom": "^12.2.4",
     "@types/node": "^12.7.3",
     "@types/node-fetch": "^2.5.0",
-    "@types/uuid": "^3.4.5",
     "source-map-support": "^0.5.13",
     "tsc-watch": "^2.4.0",
     "typescript": "^3.6.2"

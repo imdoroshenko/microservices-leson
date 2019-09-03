@@ -10,6 +10,7 @@ services:
             - '80:80'
         environment:
             COMMENTS_SERVICE: comments-service:50051
+            AMPQ_SERVICE: amqp://ampq:5672
         volumes:
             - "./gateway/src:/usr/src/app/src/:cached"
         networks:
@@ -35,13 +36,31 @@ services:
             lesson_vpn:
                 aliases:
                     - comments-service
+    fetch:
+        image: microservices_fetch
+        build:
+          context: ./fetch
+          dockerfile: Dockerfile
+        environment:
+            AMPQ_SERVICE: amqp://ampq:5672
+        volumes:
+            - "./fetch/src:/usr/src/app/src/:cached"
+        networks:
+            lesson_vpn:
+                aliases:
+                    - fetch
     comments-db:
         image: mongo:4.2.0
         networks:
             comments_vpn:
                 aliases:
                     - comments-db
-
+    ampq:
+        image: rabbitmq:3.7.1
+        networks:
+            lesson_vpn:
+                aliases:
+                    - ampq
 networks:
     lesson_vpn:
     comments_vpn:

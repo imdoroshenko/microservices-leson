@@ -7,10 +7,6 @@ async function sayHello(call: grpc.ServerUnaryCall<any>, callback: grpc.sendUnar
     callback(null, {message: 'Hello ' + call.request.name});
 }
 
-function sayHelloAgain(call: grpc.ServerUnaryCall<any>, callback: grpc.sendUnaryData<any>) {
-    callback(null, {message: 'Hello again, ' + call.request.name});
-}
-
 export function grpcServer(location: string = '127.0.0.1:50051') {
     const packageDefinition = protoLoader.loadSync(
         './protos/comments.proto', {
