@@ -3,6 +3,10 @@ import { getPgMiddleware } from './postgres-middleware'
 import { Pool } from 'pg';
 import { IResponse } from './types'
 import * as bodyParser from 'body-parser'
+import { asyncAction } from './utils/async-action';
+
+const fields = ['title', 'url', 'content', 'author']
+const isEmpty = (item: any) => typeof item === 'undefined' || item === null
 
 export async function expressServer() {
     const app = express()
@@ -10,30 +14,54 @@ export async function expressServer() {
     const pgConnectionString = process.env.PSQL_URL || ''
     app.use(bodyParser.json())
     app.use(getPgMiddleware(pgConnectionString))
-    app.get('/posts', async (req: express.Request, res: IResponse) => {
-        const result = await (res.locals.pgPool as Pool).query('SELECT * FROM posts')
+    app.get('/posts', asyncAction(async (req: express.Request, res: IResponse) => {
+        console.log('GET:/posts')
+        const db = res.locals.pgPool
+        const result = await db.query('SELECT * FROM posts')
         res.json(result.rows)
-    })
-    app.post('/posts', async (req: express.Request, res: IResponse) => {
+    }))
+    app.post('/posts', asyncAction(async (req: express.Request, res: IResponse) => {
+        console.log('POST:/posts')
+        const db = res.locals.pgPool
         const post = req.body
-        const result = await res.locals.pgPool.query(`
-        INSERT INTO posts(title, url, content, author)
-        VALUES($1::text, $2::text, $3::text, $4::text) RETURNING post_uuid
-        `, [post.title, post.url, post.content, post.author])
+        const insertFields = fields.filter(field => !isEmpty(post[field]))
+        const insertStatement = insertFields
+            .reduce<Record<string, string>>((acc, field, i) => {
+                acc[`$${i+1}::varchar`] = post[field]
+                return acc
+            }, {})
+        const result = await db.query(`
+            INSERT INTO posts(${insertFields.join(', ')})
+            VALUES(${Object.keys(insertStatement).join(', ')}) RETURNING post_uuid`,
+            Object.values(insertStatement))
         res.json(result.rows[0])
-    })
-    app.patch('/posts/:post_uuid', async (req: express.Request, res: IResponse) => {
+    }))
+    app.patch('/posts/:post_uuid', asyncAction(async (req: express.Request, res: IResponse) => {
+        console.log('PATCH:/posts')
+        const db = res.locals.pgPool
         const post = req.body
-        const result = await res.locals.pgPool.query(`
-        UPDATE posts SET title=$1::text, url=$2::text, content=$3::text, author=$4::text
-        VALUES($1, $2, $3, $4) RETURNING post_uuid
-        `, [post.title, post.url, post.content, post.author])
+        const setFields = fields.filter(field => !isEmpty(post[field]))
+        const setStatement = setFields
+            .reduce<Record<string, string>>((acc, field, i) => {
+                acc[`${field}=$${i+1}::varchar`] = post[field]
+                return acc
+            }, {})
+        const values = [...Object.values(setStatement), req.params.post_uuid]
+        const result = await db.query(`
+            UPDATE posts SET ${Object.keys(setStatement).join(', ')} WHERE post_uuid=$${values.length}::uuid RETURNING post_uuid`,
+            values)
         res.json(result.rows[0])
-    })
-    app.delete('/posts/:post_uuid', async (req: express.Request, res: IResponse) => {
-        const result = await res.locals.pgPool.query('DELETE FROM posts WHERE uuid=$1', [req.params.post_uuid])
+    }))
+    app.delete('/posts/:post_uuid', asyncAction(async (req: express.Request, res: IResponse) => {
+        console.log('DELETE:/posts')
+        const db = res.locals.pgPool
+        await db.query('DELETE FROM posts WHERE post_uuid=$1::uuid', [req.params.post_uuid])
         res.json({ post_uuid: req.params.post_uuid })
+    }))
+    app.use((err: Error, req: express.Request, res: IResponse, next: express.NextFunction) => {
+        console.log('error', err.message, 'controllers/errors.errorAction', { error: err })
+        res.status(500).json(err.message)
     })
-    
+
     app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 }

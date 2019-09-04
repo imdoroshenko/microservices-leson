@@ -19,7 +19,7 @@ CREATE TABLE Posts (
   post_uuid uuid DEFAULT uuid_generate_v4(),
   title varchar(255) NOT NULL,
   url varchar(255) DEFAULT '',
-  content text,
+  content text DEFAULT '',,
   author varchar(255) NOT NULL,
   created_ts timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
   PRIMARY KEY (post_uuid)
