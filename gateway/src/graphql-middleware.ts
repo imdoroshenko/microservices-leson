@@ -13,13 +13,18 @@ import {
     addComment,
     editComment,
     deleteComment,
-    deleteComments
+    deleteComments,
  } from './graphql/comments'
+
+ import { 
+    fetchMetadataByURL
+ } from './graphql/fetch'
 
 const schema = new GraphQLSchema({
     query: new GraphQLObjectType({ name: 'Query', fields: {
         posts,
-        comments
+        comments,
+        fetchMetadataByURL
     } }),
     mutation: new GraphQLObjectType({ name: 'Mutation', fields: {
         addPost,
