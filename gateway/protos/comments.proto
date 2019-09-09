@@ -5,14 +5,20 @@ package comments;
 service Manager {
   rpc Create (CreateComment) returns (CommentUUID) {}
   rpc Read (PostUUID) returns (CommentList) {}
-  rpc Count (PostUUID) returns (CommentList) {}
-  rpc Update (Comment) returns (CommentUUID) {}
+  rpc Count (PostUUID) returns (Count) {}
+  rpc Update (EditComment) returns (CommentUUID) {}
   rpc Delete (CommentUUID) returns (CommentUUID) {}
-  rpc DeleteFromPost (PostUUID) returns (CommentUUID) {}
+  rpc DeleteFromPost (PostUUID) returns (PostUUID) {}
 }
 
 message CreateComment {
   string post_uuid = 1;
+  string email = 2;
+  string content = 3;
+}
+
+message EditComment {
+  string comment_uuid = 1;
   string email = 2;
   string content = 3;
 }

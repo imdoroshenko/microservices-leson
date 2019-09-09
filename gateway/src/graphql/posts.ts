@@ -1,7 +1,8 @@
-import { GraphQLObjectType, GraphQLInputObjectType, GraphQLString, GraphQLList } from 'graphql'
+import { GraphQLObjectType, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graphql'
 import { IGraphQLFieldConfig } from '../types'
 import fetch from 'node-fetch'
 import { v4 as uuid } from 'uuid'
+import { Comment, countForPostResolver, getForPostResolver } from './comments'
 
 interface IHttpReqParams {
     post_uuid?: string,
@@ -35,6 +36,14 @@ const Post = new GraphQLObjectType({
         url: { type: GraphQLString },
         content: { type: GraphQLString },
         author: { type: GraphQLString },
+        comments: {
+            type: new GraphQLList(Comment),
+            resolve: getForPostResolver
+        },
+        commentsCount: {
+            type: GraphQLInt,
+            resolve: countForPostResolver
+        }
     },
 })
 
