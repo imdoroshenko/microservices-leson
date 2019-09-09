@@ -3,6 +3,29 @@ import { IGraphQLFieldConfig } from '../types'
 import fetch from 'node-fetch'
 import { v4 as uuid } from 'uuid'
 
+interface IHttpReqParams {
+    post_uuid?: string,
+    method?: string
+    body?: any
+}
+
+const POSTS_URL = process.env.POSTS_SERVICE || 'http://posts-service/posts/:post_uuid'
+
+async function httpReq({post_uuid = '', method = 'get', body}: IHttpReqParams = {}): Promise<any> {
+    const response = await fetch(POSTS_URL.replace(':post_uuid', post_uuid), {
+        method,
+        body: JSON.stringify(body),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Correlation-ID': uuid()
+        },
+    })
+    const result = await response.json()
+    if (!response.ok) {
+        throw new Error(result)
+    }
+    return result
+}
 
 const Post = new GraphQLObjectType({
     name: 'Post',
@@ -28,9 +51,10 @@ const PostInput = new GraphQLInputObjectType({
 export const posts: IGraphQLFieldConfig = {
     description: 'Get list of all posts',
     type: new GraphQLList(Post),
-    resolve: async (_, args, context) => {
-        const response = await fetch('http://posts/posts')
-        return response.json()
+    resolve: async (_, args, context) => { 
+        const response = await httpReq()
+        console.log(response)
+        return response
     }
 }
 
@@ -38,21 +62,14 @@ export const addPost: IGraphQLFieldConfig = {
     description: 'Add new post',
     type: GraphQLString,
     args: {
-        post: {
-            type: PostInput
-        }
+        post: { type: PostInput }
     },
     resolve: async (_, args, context) => {
-        const response = await fetch('http://posts/posts', {
+        const result = await httpReq({
             method: 'post',
-            body: JSON.stringify(args.post),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Correlation-ID': uuid()
-            },
+            body: args.post
         })
-        const json = await response.json()
-        return json.post_uuid
+        return result.post_uuid
     }
 }
 
@@ -60,24 +77,16 @@ export const editPost: IGraphQLFieldConfig = {
     description: 'Edit post',
     type: GraphQLString,
     args: {
-        post_uuid: {
-            type: GraphQLString
-        },
-        post: {
-            type: PostInput
-        }
+        post_uuid: { type: GraphQLString },
+        post: { type: PostInput }
     },
     resolve: async (_, args, context) => {
-        const response = await fetch('http://posts/posts/' + args.post_uuid, {
+        const result = await httpReq({
             method: 'patch',
-            body: JSON.stringify(args.post),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Correlation-ID': uuid()
-            },
+            post_uuid: args.post_uuid,
+            body: args.post
         })
-        const json = await response.json()
-        return json.post_uuid
+        return result.post_uuid
     }
 }
 
@@ -85,20 +94,13 @@ export const deletePost: IGraphQLFieldConfig = {
     description: 'Delete post',
     type: GraphQLString,
     args: {
-        post_uuid: {
-            type: GraphQLString
-        }
+        post_uuid: { type: GraphQLString }
     },
     resolve: async (_, args, context) => {
-        const response = await fetch('http://posts/posts/' + args.post_uuid, {
+        const result = await httpReq({
             method: 'delete',
-            body: JSON.stringify(args.post),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Correlation-ID': uuid()
-            },
+            post_uuid: args.post_uuid
         })
-        const json = await response.json()
-        return json.post_uuid
+        return result.post_uuid
     }
 }

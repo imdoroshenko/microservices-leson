@@ -11,12 +11,13 @@ services:
         environment:
             COMMENTS_SERVICE: comments-service:50051
             AMPQ_SERVICE: amqp://ampq:5672
+            POSTS_SERVICE: http://posts-service/posts/:post_uuid
         volumes:
             - "./gateway/src:/usr/src/app/src/:cached"
         networks:
             lesson_vpn:
                 aliases:
-                    - gateway
+                    - gateway-service
     comments:
         image: microservices_comments
         build:
@@ -48,7 +49,7 @@ services:
         networks:
             lesson_vpn:
                 aliases:
-                    - fetch
+                    - fetch-service
     posts:
         image: microservices_posts
         build:
@@ -62,7 +63,7 @@ services:
             posts_vpn:
             lesson_vpn:
                 aliases:
-                    - posts
+                    - posts-service
     comments-db:
         image: mongo:4.2.0
         networks:
