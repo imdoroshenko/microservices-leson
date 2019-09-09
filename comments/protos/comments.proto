@@ -18,7 +18,7 @@ message CreateComment {
 }
 
 message Comment {
-  string uuid = 1;
+  string comment_uuid = 1;
   string post_uuid = 2;
   string email = 3;
   string content = 4;
@@ -37,6 +37,6 @@ message PostUUID {
 }
 
 message CommentUUID {
-  string uuid = 1;
+  string comment_uuid = 1;
 }
 

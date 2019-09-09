@@ -20,21 +20,27 @@ export function grpcServer(location: string = '127.0.0.1:50051') {
     const server = new grpc.Server()
     server.addService(protoDescriptor.comments.Manager.service,
         {
-            create: (call, callback) => callback(null, {}),
-            read: (call, callback) => {
+            Create: (call, callback) => {
+                console.log('!!!!!!!!!!!')
+                callback(null, {
+                    comment_uuid: '!!!!!!!!!!!!!!!!!!'
+                })
+            },
+            Read: (call, callback) => {
                 console.log('!me!')
+                console.log(call.metadata.get('key'))
                 callback(null, {comments: [
                 {
-                    uuid: '123',
-                    post_uuid: '321',
+                    comment_uuid: '!!!!!!!!!!!!!!!!!!',
+                    post_uuid: '!!!!!!!!!!!!!',
                     email: 'test@email.com',
                     content: 'Hello World!',
                 }
             ]})},
-            count: (call, callback) => callback(null, {}),
-            update: (call, callback) => callback(null, {}),
-            delete: (call, callback) => callback(null, {}),
-            deleteFromPost: (call, callback) => callback(null, {}),
+            Count: (call, callback) => callback(null, {}),
+            Update: (call, callback) => callback(null, {}),
+            Delete: (call, callback) => callback(null, {}),
+            DeleteFromPost: (call, callback) => callback(null, {}),
         })
     server.bind(location, grpc.ServerCredentials.createInsecure())
     console.log('Server running at ' + location)

@@ -6,18 +6,27 @@ import {
     posts,
     addPost,
     editPost,
-    deletePost
+    deletePost,
  } from './graphql/posts'
-
+ import { 
+    comments,
+    addComment,
+    editComment,
+    deleteComment
+ } from './graphql/comments'
 
 const schema = new GraphQLSchema({
     query: new GraphQLObjectType({ name: 'Query', fields: {
-        posts
+        posts,
+        comments,
+        editComment,
+        deleteComment
     } }),
     mutation: new GraphQLObjectType({ name: 'Mutation', fields: {
         addPost,
         editPost,
-        deletePost
+        deletePost,
+        addComment
     } }),
 })
 
