@@ -16,8 +16,8 @@ export const fetchMetadataByURL: IGraphQLFieldConfig = {
     args: {
         url: { type: new GraphQLNonNull(GraphQLString) }
     },
-    resolve: async (_, args, context) => { 
-        const channel = await context.ampqConnection.createChannel()
-        return await sendMessage(channel, 'fetch', args, { closeChannel: true })
+    resolve: async (_, args, {ampqConnection, correlationId}) => { 
+        const channel = await ampqConnection.createChannel()
+        return await sendMessage(channel, 'fetch', args, { closeChannel: true, correlationId })
     }
 }

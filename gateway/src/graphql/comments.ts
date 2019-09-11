@@ -35,10 +35,10 @@ export const comments: IGraphQLFieldConfig = {
     args: {
         post_uuid: { type: new GraphQLNonNull(GraphQLString) }
     },
-    resolve: async (_, { post_uuid }, context) => { 
+    resolve: async (_, { post_uuid }, { grpcClient, correlationId }) => { 
         const meta = new grpc.Metadata()
-        meta.add('key', 'value')
-        const response = await context.grpcClient.Read({ post_uuid }, meta)
+        meta.add('correlationId', correlationId)
+        const response = await grpcClient.Read({ post_uuid }, meta)
         return response.comments
     }
 }
@@ -49,10 +49,10 @@ export const addComment: IGraphQLFieldConfig = {
     args: {
         comment: { type: CommentAdd }
     },
-    resolve: async (_, { comment }, context) => {
+    resolve: async (_, { comment }, { grpcClient, correlationId }) => {
         const meta = new grpc.Metadata()
-        meta.add('key', 'value')
-        const response = await context.grpcClient.Create(comment, meta)
+        meta.add('correlationId', correlationId)
+        const response = await grpcClient.Create(comment, meta)
         return response.comment_uuid
     }
 }
@@ -64,11 +64,10 @@ export const editComment: IGraphQLFieldConfig = {
         comment_uuid: { type: GraphQLString },
         comment: { type: CommentEdit }
     },
-    resolve: async (_, {comment_uuid, comment}, context) => {
+    resolve: async (_, {comment_uuid, comment}, { grpcClient, correlationId }) => {
         const meta = new grpc.Metadata()
-        meta.add('key', 'value')
-        console.log(comment)
-        const response = await context.grpcClient.Update({ ...comment, comment_uuid }, meta)
+        meta.add('correlationId', correlationId)
+        const response = await grpcClient.Update({ ...comment, comment_uuid }, meta)
         return response.comment_uuid
     }
 }
@@ -79,10 +78,10 @@ export const deleteComment: IGraphQLFieldConfig = {
     args: {
         comment_uuid: { type: GraphQLString }
     },
-    resolve: async (_, { comment_uuid }, context) => {
+    resolve: async (_, { comment_uuid }, { grpcClient, correlationId }) => {
         const meta = new grpc.Metadata()
-        meta.add('key', 'value')
-        const response = await context.grpcClient.Delete({ comment_uuid }, meta)
+        meta.add('correlationId', correlationId)
+        const response = await grpcClient.Delete({ comment_uuid }, meta)
         return response.comment_uuid
     }
 }
@@ -93,25 +92,25 @@ export const deleteComments: IGraphQLFieldConfig = {
     args: {
         post_uuid: { type: GraphQLString }
     },
-    resolve: async (_, { post_uuid }, context) => {
+    resolve: async (_, { post_uuid }, { grpcClient, correlationId }) => {
         const meta = new grpc.Metadata()
-        meta.add('key', 'value')
-        const response = await context.grpcClient.DeleteFromPost({ post_uuid }, meta)
+        meta.add('correlationId', correlationId)
+        const response = await grpcClient.DeleteFromPost({ post_uuid }, meta)
         return response.post_uuid
     }
 }
 
-export const getForPostResolver: Resolver = async function({ post_uuid }, _, context) {
+export const getForPostResolver: Resolver = async function({ post_uuid }, _, { grpcClient, correlationId }) {
     const meta = new grpc.Metadata()
-    meta.add('key', 'value')
-    const response = await context.grpcClient.Read({ post_uuid }, meta)
+    meta.add('correlationId', correlationId)
+    const response = await grpcClient.Read({ post_uuid }, meta)
     return response.comments
 }
 
-export const countForPostResolver: Resolver = async function({ post_uuid }, _, context) {
+export const countForPostResolver: Resolver = async function({ post_uuid }, _, { grpcClient, correlationId }) {
     const meta = new grpc.Metadata()
-    meta.add('key', 'value')
-    const response = await context.grpcClient.Count({ post_uuid }, meta)
+    meta.add('correlationId', correlationId)
+    const response = await grpcClient.Count({ post_uuid }, meta)
     console.log('?', response)
     return response.count
 }

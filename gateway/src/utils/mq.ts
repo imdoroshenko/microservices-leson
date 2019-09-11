@@ -1,22 +1,25 @@
-import { Channel } from "amqplib"
-import { v4 as uuid } from 'uuid'
+import { Channel } from 'amqplib'
 
 interface IsendMessageOptions {
-    closeChannel?: boolean
+    closeChannel?: boolean,
+    correlationId: string
 }
 
-export async function sendMessage(channel: Channel, queue: string, content: any, options: IsendMessageOptions = {}): Promise<any> {
+export async function sendMessage(
+    channel: Channel,
+    queue: string,
+    content: any,
+    { closeChannel, correlationId }: IsendMessageOptions): Promise<any> {
     return new Promise(async (resolve, reject) => {
         try {
-            const correlationId = uuid()
             const requestQ = queue
-            const responseQ = queue + '-response-' + correlationId
+            const responseQ = `${queue}-response-${correlationId}`
             await channel.assertQueue(requestQ, { durable: false });
             await channel.assertQueue(responseQ, { exclusive: true });
             await channel.consume(responseQ, async (msg) => {
                 if (msg) { 
                     await channel.deleteQueue(responseQ)
-                    options.closeChannel && await channel.close()
+                    closeChannel && await channel.close()
                     if (msg.properties.type === 'error') {
                         return reject(new Error(msg.content.toString()))
                     }
@@ -34,7 +37,7 @@ export async function sendMessage(channel: Channel, queue: string, content: any,
                 replyTo: responseQ
             });
         } catch (e) {
-            options.closeChannel && await channel.close()
+            closeChannel && await channel.close()
             reject(e)
         }
     })      

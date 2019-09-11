@@ -19,6 +19,7 @@ interface IGrpcMethod {
 export interface IApplicationContext {
     grpcClient: IGrpcClientAsync
     ampqConnection: Connection
+    correlationId: string
 }
 export interface IResponse extends Response {
     locals: IApplicationContext

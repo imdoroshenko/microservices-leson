@@ -1,24 +1,24 @@
 import { GraphQLObjectType, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graphql'
 import { IGraphQLFieldConfig } from '../types'
 import fetch from 'node-fetch'
-import { v4 as uuid } from 'uuid'
 import { Comment, countForPostResolver, getForPostResolver } from './comments'
 
 interface IHttpReqParams {
     post_uuid?: string,
     method?: string
     post?: any
+    correlationId: string
 }
 
 const POSTS_URL = process.env.POSTS_SERVICE || 'http://posts-service/posts/:post_uuid'
 
-async function httpReq({post_uuid = '', method = 'get', post}: IHttpReqParams = {}): Promise<any> {
+async function httpReq({post_uuid = '', method = 'get', post, correlationId}: IHttpReqParams): Promise<any> {
     const response = await fetch(POSTS_URL.replace(':post_uuid', post_uuid), {
         method,
         body: JSON.stringify(post),
         headers: {
             'Content-Type': 'application/json',
-            'X-Correlation-ID': uuid()
+            'X-Correlation-ID': correlationId
         },
     })
     const result = await response.json()
@@ -60,7 +60,7 @@ const PostInput = new GraphQLInputObjectType({
 export const posts: IGraphQLFieldConfig = {
     description: 'Get list of all posts',
     type: new GraphQLList(Post),
-    resolve: async (_, args, context) => httpReq()
+    resolve: async (_, args, { correlationId }) => httpReq({ correlationId })
 }
 
 export const addPost: IGraphQLFieldConfig = {
@@ -69,10 +69,11 @@ export const addPost: IGraphQLFieldConfig = {
     args: {
         post: { type: PostInput }
     },
-    resolve: async (_, { post }, context) => {
+    resolve: async (_, { post }, { correlationId }) => {
         const result = await httpReq({
             method: 'post',
-            post
+            post,
+            correlationId
         })
         return result.post_uuid
     }
@@ -85,11 +86,12 @@ export const editPost: IGraphQLFieldConfig = {
         post_uuid: { type: GraphQLString },
         post: { type: PostInput }
     },
-    resolve: async (_, { post_uuid, post }, context) => {
+    resolve: async (_, { post_uuid, post }, { correlationId }) => {
         const result = await httpReq({
             method: 'patch',
             post_uuid,
-            post
+            post,
+            correlationId
         })
         return result.post_uuid
     }
@@ -101,10 +103,11 @@ export const deletePost: IGraphQLFieldConfig = {
     args: {
         post_uuid: { type: GraphQLString }
     },
-    resolve: async (_, { post_uuid }, context) => {
+    resolve: async (_, { post_uuid }, { correlationId }) => {
         const result = await httpReq({
             method: 'delete',
-            post_uuid
+            post_uuid,
+            correlationId
         })
         return result.post_uuid
     }
