@@ -13,12 +13,12 @@ export async function sendMessage(
     return new Promise(async (resolve, reject) => {
         try {
             const requestQ = queue
-            const responseQ = `${queue}-response-${correlationId}`
+            const replyTo = `${queue}-response-${correlationId}`
             await channel.assertQueue(requestQ, { durable: false });
-            await channel.assertQueue(responseQ, { exclusive: true });
-            await channel.consume(responseQ, async (msg) => {
+            await channel.assertQueue(replyTo, { exclusive: true });
+            await channel.consume(replyTo, async (msg) => {
                 if (msg) { 
-                    await channel.deleteQueue(responseQ)
+                    await channel.deleteQueue(replyTo)
                     closeChannel && await channel.close()
                     if (msg.properties.type === 'error') {
                         return reject(new Error(msg.content.toString()))
@@ -34,7 +34,7 @@ export async function sendMessage(
             })
             channel.sendToQueue(requestQ, Buffer.from(JSON.stringify(content)), {
                 correlationId,
-                replyTo: responseQ
+                replyTo,
             });
         } catch (e) {
             closeChannel && await channel.close()

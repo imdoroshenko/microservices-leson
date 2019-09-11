@@ -1,9 +1,9 @@
 import * as express from 'express'
-import { getPgMiddleware } from './postgres-middleware'
-import { Pool } from 'pg';
+import { getPgMiddleware } from './middleware/postgres'
 import { IResponse } from './types'
 import * as bodyParser from 'body-parser'
-import { asyncAction } from './utils/async-action';
+import { asyncAction } from './utils/async-action'
+import { log } from './utils/logger'
 
 const fields = ['title', 'url', 'content', 'author']
 const isEmpty = (item: any) => typeof item === 'undefined' || item === null
@@ -15,13 +15,13 @@ export async function expressServer() {
     app.use(bodyParser.json())
     app.use(getPgMiddleware(pgConnectionString))
     app.get('/posts', asyncAction(async (req: express.Request, res: IResponse) => {
-        console.log('GET:/posts')
+        log.info('GET:/posts', { correlationId: req.header('X-Correlation-Id') })
         const db = res.locals.pgPool
         const result = await db.query('SELECT * FROM posts')
         res.json(result.rows)
     }))
     app.post('/posts', asyncAction(async (req: express.Request, res: IResponse) => {
-        console.log('POST:/posts')
+        log.info('POST:/posts', { correlationId: req.header('X-Correlation-Id') })
         const db = res.locals.pgPool
         const post = req.body
         const insertFields = fields.filter(field => !isEmpty(post[field]))
@@ -37,7 +37,7 @@ export async function expressServer() {
         res.json(result.rows[0])
     }))
     app.patch('/posts/:post_uuid', asyncAction(async (req: express.Request, res: IResponse) => {
-        console.log('PATCH:/posts')
+        log.info('PATCH:/posts', { correlationId: req.header('X-Correlation-Id') })
         const db = res.locals.pgPool
         const post = req.body
         const setFields = fields.filter(field => !isEmpty(post[field]))
@@ -53,15 +53,15 @@ export async function expressServer() {
         res.json(result.rows[0])
     }))
     app.delete('/posts/:post_uuid', asyncAction(async (req: express.Request, res: IResponse) => {
-        console.log('DELETE:/posts')
+        log.info('DELETE:/posts', { correlationId: req.header('X-Correlation-Id') })
         const db = res.locals.pgPool
         await db.query('DELETE FROM posts WHERE post_uuid=$1::uuid', [req.params.post_uuid])
         res.json({ post_uuid: req.params.post_uuid })
     }))
     app.use((err: Error, req: express.Request, res: IResponse, next: express.NextFunction) => {
-        console.log('error', err.message, 'controllers/errors.errorAction', { error: err })
+        log.info('error', err.message)
         res.status(500).json(err.message)
     })
 
-    app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+    app.listen(port, () => log.info(`Example app listening on port ${port}!`))
 }

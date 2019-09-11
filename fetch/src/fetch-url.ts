@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import { JSDOM } from 'jsdom'
 
 export async function fetchUrlMeta(url: string) {
-    const response = await fetch(url)
+    const response = await fetch(url, { timeout: 5000 })
     const text = await response.text()
     const dom = new JSDOM(text)
     const title = dom.window.document.querySelector('title')

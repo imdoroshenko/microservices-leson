@@ -18,7 +18,7 @@ async function httpReq({post_uuid = '', method = 'get', post, correlationId}: IH
         body: JSON.stringify(post),
         headers: {
             'Content-Type': 'application/json',
-            'X-Correlation-ID': correlationId
+            'X-Correlation-Id': correlationId
         },
     })
     const result = await response.json()

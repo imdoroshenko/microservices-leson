@@ -1,9 +1,10 @@
 import * as express from 'express'
-import { getGrqpcMiddleware } from './grpc-middleware'
-import { getAmpqMiddleware } from './amqp-middleware'
-import { getGraphqlMiddleware } from './graphql-middleware'
+import { getGrqpcMiddleware } from './middleware/grpc'
+import { getAmpqMiddleware } from './middleware/amqp'
+import { getGraphqlMiddleware } from './middleware/graphql'
 import { v4 as uuid } from 'uuid'
 import { IResponse } from './types'
+import { log } from './utils/logger'
 
 export async function expressServer() {
     const app = express()
@@ -17,5 +18,5 @@ export async function expressServer() {
     app.use(await getGrqpcMiddleware(grpcAddress))
     app.use(await getAmpqMiddleware(ampqAddress))
     app.use('/graphql', getGraphqlMiddleware())
-    app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+    app.listen(port, () => log.info(`Example app listening on port ${port}!`))
 }

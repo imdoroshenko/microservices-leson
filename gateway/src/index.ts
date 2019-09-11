@@ -1,17 +1,18 @@
 import * as cluster from 'cluster'
 import * as os from 'os'
 import { expressServer } from './express-server'
+import { log } from './utils/logger'
 
 const numCPUs = os.cpus().length
   if (cluster.isMaster) {
-    console.log('info', `Master ${process.pid} is running`, 'index')
+    log.info(`Master ${process.pid} is running`)
     for (let i = 0; i < numCPUs; i++) {
       cluster.fork()
     }
     cluster.on('exit', (worker: cluster.Worker, code: string, signal: string) =>
-      console.log('crit', `worker ${worker.process.pid} died. ${code} - ${signal}`, 'index'),
+      log.crit(`worker ${worker.process.pid} died. ${code} - ${signal}`),
     )
   } else {
     expressServer()
-    console.log('info', `Worker ${process.pid} started`, 'index')
+    log.info(`Worker ${process.pid} started`)
   }

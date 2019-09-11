@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLInputObjectType, GraphQLString, GraphQLList, graphqlSync, GraphQLNonNull } from 'graphql'
+import { GraphQLObjectType, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLNonNull } from 'graphql'
 import { IGraphQLFieldConfig, Resolver } from '../types'
 import * as grpc from 'grpc'
 
@@ -111,6 +111,5 @@ export const countForPostResolver: Resolver = async function({ post_uuid }, _, {
     const meta = new grpc.Metadata()
     meta.add('correlationId', correlationId)
     const response = await grpcClient.Count({ post_uuid }, meta)
-    console.log('?', response)
     return response.count
 }

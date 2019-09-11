@@ -1,6 +1,7 @@
 import { sendMessage } from '../utils/mq'
 import { GraphQLObjectType, GraphQLString, GraphQLNonNull } from 'graphql'
 import { IGraphQLFieldConfig } from '../types'
+import { log } from '../utils/logger'
 
 export const Metadata = new GraphQLObjectType({
     name: 'Metadata',
@@ -18,6 +19,7 @@ export const fetchMetadataByURL: IGraphQLFieldConfig = {
     },
     resolve: async (_, args, {ampqConnection, correlationId}) => { 
         const channel = await ampqConnection.createChannel()
+        log.info(`AMQP Message to fetch service`, { correlationId })
         return await sendMessage(channel, 'fetch', args, { closeChannel: true, correlationId })
     }
 }
