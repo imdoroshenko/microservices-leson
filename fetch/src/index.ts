@@ -1,4 +1,3 @@
-import * as cluster from 'cluster'
 import { getConnection } from './amqp'
 import { fetchUrlMeta } from './fetch-url'
 
@@ -12,16 +11,16 @@ async function serve() {
   await channel.assertQueue(queue, { durable: false })
   channel.consume(queue, async (msg) => {
       if (msg) {
-        const replyTo = msg.properties.replyTo
+        const { replyTo, correlationId } = msg.properties.replyTo
         try {
           const content = msg.content.toString()
           const incomingData = JSON.parse(content)
           console.log('incoming message:' + content)
           const meta = await fetchUrlMeta(incomingData.url)
-          channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(meta)), { correlationId: msg.properties.clusterId, type: 'success' })  
+          channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(meta)), { correlationId, type: 'success' })  
         } catch (e) {
           console.error(e)
-          channel.sendToQueue(replyTo, Buffer.from(e.message), { correlationId: msg.properties.clusterId, type: 'error' })
+          channel.sendToQueue(replyTo, Buffer.from(e.message), { correlationId, type: 'error' })
         }
       } 
   }, {

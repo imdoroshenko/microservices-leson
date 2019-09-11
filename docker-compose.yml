@@ -44,6 +44,10 @@ services:
           dockerfile: Dockerfile
         environment:
             AMPQ_SERVICE: amqp://ampq:5672
+        deploy:
+            mode: replicated
+            replicas: 2
+            endpoint_mode: dnsrr
         volumes:
             - "./fetch/src:/usr/src/app/src/:cached"
         networks:
@@ -57,6 +61,10 @@ services:
           dockerfile: Dockerfile
         environment:
             PSQL_URL: postgresql://postgres:@posts-db:5432/posts
+        deploy:
+            mode: replicated
+            replicas: 2
+            endpoint_mode: dnsrr
         volumes:
             - "./posts/src:/usr/src/app/src/:cached"
         networks:
